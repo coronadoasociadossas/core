@@ -1,0 +1,28 @@
+{
+  "name": "@coronadoasociados/core",
+  "version": "1.0.10",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsup src/index.ts --dts --watch --clean",
+    "build": "tsup src/index.ts --dts --clean"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@middy/core": "^6.1.6",
+    "dayjs": "^1.11.13",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "mysql2": "^3.14.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7",
+    "zod": "^3.22.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2"
+  }
+}
