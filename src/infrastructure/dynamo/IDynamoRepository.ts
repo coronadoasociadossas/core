@@ -6,10 +6,10 @@ export interface IDynamoRepository {
     get(tableName: string, key: any): Promise<any>;
     
     // Query items using index
-    query(tableName: string, params: any): Promise<any[]>;
+    query<T>(params: AWS.DynamoDB.DocumentClient.QueryInput): Promise<T[]>;
     
     // Scan all items (use with caution)
-    scan(tableName: string, params?: any): Promise<any[]>;
+    scan<T>(params: AWS.DynamoDB.DocumentClient.ScanInput): Promise<T[]>;
     
     // Delete an item
     delete(tableName: string, key: any): Promise<void>;

@@ -1,22 +1,18 @@
-
-
 export interface User {
     id: string;
-    id_type: string;
     id_number: string;
+    id_type: 'CC' | 'CE' | string;
     names: string;
     last_names: string;
     email: string;
     password: string;
     temp_password: boolean;
-    phone: string;    
+    gender: 'M' | 'F';
     address: string;
-    gender: string;
     wrong_login_attempts: number;
-    status: number;
-    role: string;
-    policies?: [];
-    created_at?: Date;
-    updated_at?: Date;
-    deleted_at?: Date;
+    status: string;
+    role_id: string;
+    created_at: Date; // ISO date string
+    updated_at: Date; // ISO date string
+    deleted_at?: Date; // ISO date string, optional
 }

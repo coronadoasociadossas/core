@@ -1,14 +1,13 @@
-import { User } from "./user";
-
+import { User } from '@/domain/models/user';
 
 export interface Session {
     id: string;
-    ip_address: string;
     user_id: string;
     user?: User;
-    login_date: Date;
-    logout_date: Date | null;
-    created_at?: Date;
-    updated_at?: Date;
-    deleted_at?: Date;
+    ip_address: string;
+    login_date: string;   // ISO date string
+    logout_date: string;  // ISO date string
+    created_at: string;   // ISO date string
+    updated_at: string;   // ISO date string
+    deleted_at?: string;  // ISO date string, optional
 }

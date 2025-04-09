@@ -11,15 +11,15 @@ export class DynamoRepository implements IDynamoRepository {
     }
 
     async put(tableName: string, item: any): Promise<void> {
-        const params = {
+        const params: AWS.DynamoDB.DocumentClient.PutItemInput = {
             TableName: tableName,
-            Item: item
+            Item: item,
         };
         await this.docClient.put(params).promise();
     }
 
     async get(tableName: string, key: any): Promise<any> {
-        const params = {
+        const params: AWS.DynamoDB.DocumentClient.GetItemInput = {
             TableName: tableName,
             Key: key
         };
@@ -27,28 +27,20 @@ export class DynamoRepository implements IDynamoRepository {
         return result.Item;
     }
 
-    async query(tableName: string, params: any): Promise<any[]> {
-        const queryParams = {
-            TableName: tableName,
-            ...params
-        };
-        const result = await this.docClient.query(queryParams).promise();
-        return result.Items || [];
+    async query<T>(params: AWS.DynamoDB.DocumentClient.QueryInput): Promise<T[]> {
+        const result = await this.docClient.query(params).promise();
+        return result.Items as T[] || [];
     }
 
-    async scan(tableName: string, params?: any): Promise<any[]> {
-        const scanParams = {
-            TableName: tableName,
-            ...params
-        };
-        const result = await this.docClient.scan(scanParams).promise();
-        return result.Items || [];
+    async scan<T>(params: AWS.DynamoDB.DocumentClient.ScanInput): Promise<T[]> {
+        const result = await this.docClient.scan(params).promise();
+        return result.Items as T[] || [];
     }
 
     async delete(tableName: string, key: any): Promise<void> {
-        const params = {
+        const params: AWS.DynamoDB.DocumentClient.DeleteItemInput = {
             TableName: tableName,
-            Key: key
+            Key: key,
         };
         await this.docClient.delete(params).promise();
     }
@@ -85,7 +77,7 @@ export class DynamoRepository implements IDynamoRepository {
     async update(tableName: string, key: any, updateData: any): Promise<void> {
         const { updateExpression, expressionAttributeValues, expressionAttributeNames } = this.buildUpdateExpression(updateData);
 
-        const params = {
+        const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
             TableName: tableName,
             Key: key,
             UpdateExpression: updateExpression,
