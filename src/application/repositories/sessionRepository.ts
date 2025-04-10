@@ -3,6 +3,7 @@ import { User } from "@/domain/models/user";
 import { ISessionRepository } from "@/domain/repositories/sessionRepository";
 import { IUserRepository } from "@/domain/repositories/userRepository";
 import { DynamoRepository } from "@/infrastructure/dynamo/DynamoRepository";
+import { marshall } from "@aws-sdk/util-dynamodb";
 import dayjs from "dayjs";
 import { inject, injectable } from "tsyringe";
 
@@ -13,7 +14,16 @@ export class SessionRepository implements ISessionRepository {
 
     constructor(
         @inject(DynamoRepository) private dynamoDBRepository: DynamoRepository
-    ) {}
+    ) { }
+
+
+    async updateSession(sessionId: string, session: Partial<Session>): Promise<void> {
+        const key = marshall({
+            session_id: sessionId,
+        });
+        console.log("key", key)
+        await this.dynamoDBRepository.update<Session>(this.SESSION_TABLE, key, session);
+    }
 
     async getLastOpenSessionByUserId(userId: string): Promise<Session | undefined> {
         const todayStart = dayjs().startOf("day").toISOString();
@@ -45,6 +55,8 @@ export class SessionRepository implements ISessionRepository {
     async createSession(session: Session): Promise<void> {
         await this.dynamoDBRepository.put<Session>(this.SESSION_TABLE, session);
     }
-    
+
+
+
 
 }

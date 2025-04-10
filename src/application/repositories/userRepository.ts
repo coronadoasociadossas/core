@@ -12,6 +12,13 @@ export class UserRepository implements IUserRepository {
         @inject(DynamoRepository) private dynamoDBRepository: DynamoRepository
     ) { }
 
+    async getUserById(userId: string): Promise<User | undefined> {
+        const user = await this.dynamoDBRepository.get<User>(this.USER_TABLE, {
+            user_id: userId,
+        });
+        return user
+    }
+
     async getUserByUsername(username: string): Promise<User | undefined> {
         const [user] = await this.dynamoDBRepository.scan<User>({
             TableName: this.USER_TABLE,
@@ -25,5 +32,7 @@ export class UserRepository implements IUserRepository {
 
         return user
     }
+
+    
 
 }

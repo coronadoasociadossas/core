@@ -1,4 +1,4 @@
-import { BatchGetItemCommand, BatchWriteItemCommand, DeleteItemCommand, DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand, QueryCommandInput, ScanCommand, ScanCommandInput, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
+import { AttributeValue, BatchGetItemCommand, BatchWriteItemCommand, DeleteItemCommand, DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand, QueryCommandInput, ScanCommand, ScanCommandInput, UpdateItemCommand, UpdateItemCommandInput } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { IDynamoRepository } from './IDynamoRepository';
 import { injectable } from 'tsyringe';
@@ -81,17 +81,16 @@ export class DynamoRepository implements IDynamoRepository {
         return result.Responses?.[tableName] || [];
     }
 
-    async update(tableName: string, key: any, updateData: any): Promise<void> {
+    async update<T>(tableName: string, key: Record<string, AttributeValue>, updateData: Partial<T>): Promise<void> {
         const { updateExpression, expressionAttributeValues, expressionAttributeNames } = this.buildUpdateExpression(updateData);
-
-        const params = {
+        const params: UpdateItemCommandInput = {
             TableName: tableName,
             Key: key,
             UpdateExpression: updateExpression,
-            ExpressionAttributeValues: expressionAttributeValues,
+            ExpressionAttributeValues: marshall(expressionAttributeValues),
             ExpressionAttributeNames: expressionAttributeNames
         };
-
+        console.log(params)
         await this.client.send(new UpdateItemCommand(params));
     }
 

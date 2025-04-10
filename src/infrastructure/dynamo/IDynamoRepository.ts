@@ -1,4 +1,4 @@
-import { QueryCommandInput, ScanCommandInput } from '@aws-sdk/client-dynamodb';
+import { AttributeValue, QueryCommandInput, ScanCommandInput } from '@aws-sdk/client-dynamodb';
 
 export interface IDynamoRepository {
     // Create or Update item
@@ -23,5 +23,5 @@ export interface IDynamoRepository {
     batchGet(tableName: string, keys: Record<string, any>[]): Promise<Record<string, any>[]>;
 
     // Update an item
-    update(tableName: string, key: Record<string, any>, updateData: Record<string, any>): Promise<void>;
+    update<T>(tableName: string, key: Record<string, AttributeValue>, updateData: Partial<T>): Promise<void>;
 }
