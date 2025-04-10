@@ -90,7 +90,6 @@ export class DynamoRepository implements IDynamoRepository {
             ExpressionAttributeValues: marshall(expressionAttributeValues),
             ExpressionAttributeNames: expressionAttributeNames
         };
-        console.log(params)
         await this.client.send(new UpdateItemCommand(params));
     }
 

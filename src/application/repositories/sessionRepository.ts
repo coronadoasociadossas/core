@@ -21,7 +21,6 @@ export class SessionRepository implements ISessionRepository {
         const key = marshall({
             session_id: sessionId,
         });
-        console.log("key", key)
         await this.dynamoDBRepository.update<Session>(this.SESSION_TABLE, key, session);
     }
 
