@@ -1,48 +1,55 @@
-import { DynamoDBConnection } from './conection';
+import { BatchGetItemCommand, BatchWriteItemCommand, DeleteItemCommand, DynamoDBClient, GetItemCommand, PutItemCommand, QueryCommand, QueryCommandInput, ScanCommand, ScanCommandInput, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { IDynamoRepository } from './IDynamoRepository';
-import AWS from 'aws-sdk';
+import { injectable } from 'tsyringe';
 
+@injectable()
 export class DynamoRepository implements IDynamoRepository {
-    private docClient: AWS.DynamoDB.DocumentClient;
+    private client: DynamoDBClient;
 
     constructor() {
-        const connection = DynamoDBConnection.getInstance();
-        this.docClient = connection.getDocumentClient();
+        this.client = new DynamoDBClient({});
     }
 
-    async put(tableName: string, item: any): Promise<void> {
-        const params: AWS.DynamoDB.DocumentClient.PutItemInput = {
+    async put<T>(tableName: string, item: T): Promise<void> {
+        const params = {
             TableName: tableName,
-            Item: item,
+            Item: marshall(item, {
+                removeUndefinedValues: true, // Remove undefined values from the item
+            }) // Convert the item to DynamoDB format,
         };
-        await this.docClient.put(params).promise();
+        await this.client.send(new PutItemCommand(params));
     }
 
-    async get(tableName: string, key: any): Promise<any> {
-        const params: AWS.DynamoDB.DocumentClient.GetItemInput = {
+    async get<T>(tableName: string, key: Partial<T>): Promise<T | undefined> {
+        const params = {
             TableName: tableName,
-            Key: key
+            Key: marshall(key, {
+                removeUndefinedValues: true, // Remove undefined values from the key
+            }), // Convert the key to DynamoDB format
         };
-        const result = await this.docClient.get(params).promise();
-        return result.Item;
+        const result = await this.client.send(new GetItemCommand(params));
+        return result.Item as T; // Return the item as a JavaScript object
     }
 
-    async query<T>(params: AWS.DynamoDB.DocumentClient.QueryInput): Promise<T[]> {
-        const result = await this.docClient.query(params).promise();
-        return result.Items as T[] || [];
+    async query<T>(params: QueryCommandInput): Promise<T[]> {
+        const result = await this.client.send(new QueryCommand(params));
+        const data = result.Items ?? [];
+        return data.map(item => unmarshall(item)) as T[]; // Unmarshall the data to convert it to a JavaScript object
     }
 
-    async scan<T>(params: AWS.DynamoDB.DocumentClient.ScanInput): Promise<T[]> {
-        const result = await this.docClient.scan(params).promise();
-        return result.Items as T[] || [];
+    async scan<T>(params: ScanCommandInput): Promise<T[]> {
+        const result = await this.client.send(new ScanCommand(params));
+        const data = result.Items ?? [];
+        return data.map(item => unmarshall(item)) as T[]; // Unmarshall the data to convert it to a JavaScript object
     }
 
     async delete(tableName: string, key: any): Promise<void> {
-        const params: AWS.DynamoDB.DocumentClient.DeleteItemInput = {
+        const params = {
             TableName: tableName,
             Key: key,
         };
-        await this.docClient.delete(params).promise();
+        await this.client.send(new DeleteItemCommand(params));
     }
 
     async batchWrite(tableName: string, items: any[]): Promise<void> {
@@ -58,7 +65,7 @@ export class DynamoRepository implements IDynamoRepository {
             }
         };
 
-        await this.docClient.batchWrite(params).promise();
+        await this.client.send(new BatchWriteItemCommand(params));
     }
 
     async batchGet(tableName: string, keys: any[]): Promise<any[]> {
@@ -70,14 +77,14 @@ export class DynamoRepository implements IDynamoRepository {
             }
         };
 
-        const result = await this.docClient.batchGet(params).promise();
+        const result = await this.client.send(new BatchGetItemCommand(params));
         return result.Responses?.[tableName] || [];
     }
 
     async update(tableName: string, key: any, updateData: any): Promise<void> {
         const { updateExpression, expressionAttributeValues, expressionAttributeNames } = this.buildUpdateExpression(updateData);
 
-        const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+        const params = {
             TableName: tableName,
             Key: key,
             UpdateExpression: updateExpression,
@@ -85,13 +92,13 @@ export class DynamoRepository implements IDynamoRepository {
             ExpressionAttributeNames: expressionAttributeNames
         };
 
-        await this.docClient.update(params).promise();
+        await this.client.send(new UpdateItemCommand(params));
     }
 
-    private buildUpdateExpression(updateData: any): { 
-        updateExpression: string; 
-        expressionAttributeValues: any; 
-        expressionAttributeNames: any; 
+    private buildUpdateExpression(updateData: any): {
+        updateExpression: string;
+        expressionAttributeValues: any;
+        expressionAttributeNames: any;
     } {
         const sets: string[] = [];
         const expressionAttributeValues: any = {};

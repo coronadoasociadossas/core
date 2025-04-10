@@ -1,25 +1,27 @@
+import { QueryCommandInput, ScanCommandInput } from '@aws-sdk/client-dynamodb';
+
 export interface IDynamoRepository {
     // Create or Update item
-    put(tableName: string, item: any): Promise<void>;
-    
+    put<T>(tableName: string, item: T): Promise<void>;
+
     // Get single item by primary key
-    get(tableName: string, key: any): Promise<any>;
-    
+    get<T>(tableName: string, key: Partial<T>): Promise<T | undefined>;
+
     // Query items using index
-    query<T>(params: AWS.DynamoDB.DocumentClient.QueryInput): Promise<T[]>;
-    
+    query<T>(params: QueryCommandInput): Promise<T[]>;
+
     // Scan all items (use with caution)
-    scan<T>(params: AWS.DynamoDB.DocumentClient.ScanInput): Promise<T[]>;
-    
+    scan<T>(params: ScanCommandInput): Promise<T[]>;
+
     // Delete an item
-    delete(tableName: string, key: any): Promise<void>;
-    
+    delete(tableName: string, key: Record<string, any>): Promise<void>;
+
     // Batch write items (put or delete)
-    batchWrite(tableName: string, items: any[]): Promise<void>;
-    
+    batchWrite(tableName: string, items: Record<string, any>[]): Promise<void>;
+
     // Batch get items
-    batchGet(tableName: string, keys: any[]): Promise<any[]>;
-    
+    batchGet(tableName: string, keys: Record<string, any>[]): Promise<Record<string, any>[]>;
+
     // Update an item
-    update(tableName: string, key: any, updateData: any): Promise<void>;
+    update(tableName: string, key: Record<string, any>, updateData: Record<string, any>): Promise<void>;
 }
